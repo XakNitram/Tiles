@@ -24,20 +24,20 @@ namespace world {
     }
 
     Landscape::Renderer::Renderer(float aspect) {
-        const auto chunk_size = static_cast<float>(edgeCells);
-        float width, height, x_pad, y_pad;
+        const auto chunkSize = static_cast<float>(edgeCells);
+        float width, height, xPad, yPad;
         if (aspect >= 1.0f) {
             width = aspect;
             height = 1.0f;
 
-            x_pad = -1.0f / aspect;
-            y_pad = -1.0f;
+            xPad = -1.0f / aspect;
+            yPad = -1.0f;
         } else {
             width = 1.0f;
             height = 1.0f / aspect;
 
-            x_pad = -1.0;
-            y_pad = -aspect;
+            xPad = -1.0;
+            yPad = -aspect;
         }
 
         lwvl::VertexShader vs{lwvl::VertexShader::readFile("Data/Shaders/chunk.vert")};
@@ -46,8 +46,8 @@ namespace world {
         renderControl.bind();
 
         const float world[16]{
-            2.0f / (width * chunk_size), 0.0f, 0.0f, x_pad,
-            0.0f, 2.0f / (height * chunk_size), 0.0f, y_pad,
+            2.0f / (width * chunkSize), 0.0f, 0.0f, xPad,
+            0.0f, 2.0f / (height * chunkSize), 0.0f, yPad,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 0.0f
         };
@@ -57,9 +57,6 @@ namespace world {
         constexpr uint64_t numQuadsY = edgeCells;
         constexpr uint64_t numVerticesX = numQuadsX + 1;
         constexpr uint64_t numVerticesY = numQuadsY + 1;
-
-        arrayBuffer.bind();
-        vertexBuffer.bind();
 
         // Construct vertex buffer
         std::array<float, numVerticesX * numVerticesY * 2> chunkVertices{};
@@ -71,6 +68,8 @@ namespace world {
             }
         }
 
+        arrayBuffer.bind();
+        vertexBuffer.bind();
         vertexBuffer.construct(chunkVertices.begin(), chunkVertices.end());
         arrayBuffer.attribute(2, GL_FLOAT, 2 * sizeof(float), 0);
 
@@ -86,6 +85,7 @@ namespace world {
                 const uint64_t currentQuad = row * numQuadsX + col;
                 const uint64_t leftCorner = currentQuad + row;
                 const size_t index = size_t(currentQuad) * 4;
+
                 chunkIndices[index + 0] = static_cast<uint32_t>(leftCorner);
                 chunkIndices[index + 1] = static_cast<uint32_t>(leftCorner + 1);
                 chunkIndices[index + 2] = static_cast<uint32_t>(leftCorner + numVerticesX + 1);
@@ -106,7 +106,10 @@ namespace world {
     void Landscape::Renderer::draw() {
         renderControl.bind();
         arrayBuffer.bind();
-        arrayBuffer.drawElements(lwvl::PrimitiveMode::TriangleFan, 4, lwvl::ByteFormat::UnsignedInt);
+        arrayBuffer.drawElements(
+            lwvl::PrimitiveMode::TriangleFan,
+            4, lwvl::ByteFormat::UnsignedInt
+        );
     }
 
     void Landscape::Renderer::update(ChunkMap &chunkMap) {
@@ -132,12 +135,12 @@ namespace world {
     }
 
     Landscape::Landscape(float aspect) : renderer(aspect) {
-        map.reserve(9);
-        for (int32_t i = -1; i < 2; i++) {
-            for (int32_t j = -1; j < 2; j++) {
-                construct(i, j, (i + 1) * 3 + (j + 1));
-            }
-        }
+        map.reserve(1);
+        //for (int32_t i = -1; i < 2; i++) {
+        //    for (int32_t j = -1; j < 2; j++) {
+        //        construct(i, j, (i + 1) * 3 + (j + 1));
+        //    }
+        //}
 
         renderer.update(map);
     }

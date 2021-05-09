@@ -8,7 +8,6 @@
 
 
 namespace world {
-
     struct CoordinateHash {
         std::size_t operator()(const WorldCoordinate &k) const;
     };
